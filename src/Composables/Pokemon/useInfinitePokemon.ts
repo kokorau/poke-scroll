@@ -1,11 +1,7 @@
-import {PokemonRepositoryImpl} from "../../Infra/Pokemon/RepositoryImpl/PokemonRepositoryImpl.ts";
-import {FetchPokemonListUsecase} from "../../Application/Usecase/FetchPokemonListUsecase.ts";
+import {getPokemonList} from "../../Application/Usecase/GetPokemonList.ts";
 import type {Pokemon} from "../../domain/Pokemon/Entity/Pokemon.ts";
 import {useInfiniteScroll} from "@vueuse/core";
-import {ref} from "vue";
-
-const repo = PokemonRepositoryImpl;
-const usecase = FetchPokemonListUsecase(repo);
+import {ref, type Ref} from "vue";
 
 export function useInfinitePokemon(containerEl: Ref<HTMLElement | null>) {
     const offset = ref(0);
@@ -18,16 +14,23 @@ export function useInfinitePokemon(containerEl: Ref<HTMLElement | null>) {
         if (loading.value || !hasMore.value) return;
         loading.value = true;
 
-        const list = await usecase.execute(offset.value, limit);
-        pokemons.value.push(...list.items);
-        offset.value += limit;
+        try {
+            const list = await getPokemonList(offset.value, limit);
+            pokemons.value.push(...list.items);
+            offset.value += limit;
 
-        if (list.items.length < limit) hasMore.value = false;
-
-        loading.value = false;
+            if (list.items.length < limit) hasMore.value = false;
+        } catch (error) {
+            console.error('Error loading pokemon:', error);
+        } finally {
+            loading.value = false;
+        }
     };
 
-    useInfiniteScroll(containerEl, loadMore, { distance: 300 });
+    useInfiniteScroll(containerEl, loadMore, { 
+        distance: 200,
+        throttle: 500 
+    });
 
     return {
         pokemons,
