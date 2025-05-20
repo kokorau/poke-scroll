@@ -1,7 +1,7 @@
 <template>
   <div class="container" v-bind="containerProps">
     <div v-bind="wrapperProps">
-      <div v-for="pokemon in list" :key="pokemon.id" class="item">
+      <div v-for="pokemon in list" :key="pokemon.id" class="item" :style="{ height: `${ITEM_HEIGHT}px` }">
         <img :src="pokemon.data.imageUrl" :alt="pokemon.data.name" />
         <p>{{ pokemon.data.name }}</p>
       </div>
@@ -15,6 +15,10 @@ import type {Pokemon} from "../domain/Pokemon/Entity/Pokemon.ts";
 import {useInfiniteScroll, useVirtualList} from "@vueuse/core";
 import {getPokemonList} from "../Application/Usecase/GetPokemonList.ts";
 
+const GET_LIMIT = 30;
+const TOTAL_POKEMON_COUNT = 300;
+const ITEM_HEIGHT = 112;
+
 const pokemons = ref<Pokemon[]>([]);
 
 const { wrapperProps, containerProps, list } = useVirtualList(
@@ -25,26 +29,31 @@ const { wrapperProps, containerProps, list } = useVirtualList(
     },
 )
 
-const loadMorePokemons = async () => {
+const cachePokemons: Pokemon[] = []
+const loadMorePokemons = async (): void => {
   const offset = pokemons.value.length;
-  const { items } = await getPokemonList(offset, 30);
-  pokemons.value = [...pokemons.value, ...items];
+  const { items } = await getPokemonList(offset, GET_LIMIT);
+  cachePokemons.push(...items);
+  pokemons.value = cachePokemons.slice(); // 参照切りして更新
 }
 
-const onLoadMore = () => {
-  if (pokemons.value.length >= 100) return
-  loadMorePokemons();
+const isLoading = ref<boolean>(false)
+const onLoadMore = async () => {
+  if (isLoading.value) return;
+  try {
+    isLoading.value = true;
+    await loadMorePokemons();
+  } finally {
+    isLoading.value = false;
+  }
 }
 
 useInfiniteScroll(containerProps.ref, onLoadMore, {
-  offset: 50,
-  throttle: 500,
-  canLoadMore: () => pokemons.value.length < 100,
+  offset: 400,
+  canLoadMore: () => pokemons.value.length !== 0 && pokemons.value.length < TOTAL_POKEMON_COUNT
 })
 
-onMounted(async () => {
-  pokemons.value = (await getPokemonList(0, 30)).items
-});
+onMounted(loadMorePokemons)
 </script>
 
 <style scoped>
@@ -59,7 +68,6 @@ onMounted(async () => {
   align-items: center;
   gap: 12px;
   padding: 8px;
-  height: 112px;
   width: 208px;
 }
 </style>
