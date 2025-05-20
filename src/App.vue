@@ -6,11 +6,13 @@ import PokemonListVirtualList from "./components/PokemonListVirtualList.vue";
 <template>
   <div style="display: flex; flex-direction: row; gap: 16px;">
     <div style="display: flex; flex-direction: column; gap: 16px;">
-      <div>Infinite Scroll</div>
+      <p>Infinite Scroll</p>
+      <p>下までスクロールしたら追加読み込み</p>
       <PokemonListInfiniteScroll/>
     </div>
     <div style="display: flex; flex-direction: column; gap: 16px;">
-      <div>Virtual List</div>
+      <p>Virtual List</p>
+      <p>表示領域のみ描画</p>
       <PokemonListVirtualList/>
     </div>
   </div>
