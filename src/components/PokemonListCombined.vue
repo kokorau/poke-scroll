@@ -1,7 +1,7 @@
 <template>
   <div class="container" v-bind="containerProps">
     <div v-bind="wrapperProps">
-      <div v-for="pokemon in list" :key="pokemon.id" class="item" :style="{ height: `${ITEM_HEIGHT}px` }">
+      <div v-for="pokemon in list" :key="pokemon.data.id" class="item" :style="{ height: `${ITEM_HEIGHT}px` }">
         <img :src="pokemon.data.imageUrl" :alt="pokemon.data.name" />
         <p>{{ pokemon.data.name }}</p>
       </div>
@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted, computed} from "vue";
+import {ref, onMounted} from "vue";
 import type {Pokemon} from "../domain/Pokemon/Entity/Pokemon.ts";
 import {useInfiniteScroll, useVirtualList} from "@vueuse/core";
 import {getPokemonList} from "../Application/Usecase/GetPokemonList.ts";
@@ -30,7 +30,7 @@ const { wrapperProps, containerProps, list } = useVirtualList(
 )
 
 const cachePokemons: Pokemon[] = []
-const loadMorePokemons = async (): void => {
+const loadMorePokemons = async (): Promise<void> => {
   const offset = pokemons.value.length;
   const { items } = await getPokemonList(offset, GET_LIMIT);
   cachePokemons.push(...items);
@@ -49,7 +49,7 @@ const onLoadMore = async () => {
 }
 
 useInfiniteScroll(containerProps.ref, onLoadMore, {
-  offset: 400,
+  offset: { bottom: 400 },
   canLoadMore: () => pokemons.value.length !== 0 && pokemons.value.length < TOTAL_POKEMON_COUNT
 })
 

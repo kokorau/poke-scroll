@@ -1,7 +1,7 @@
 <template>
   <div class="container" v-bind="containerProps">
     <div v-bind="wrapperProps">
-      <div v-for="pokemon in list" :key="pokemon.id" class="item">
+      <div v-for="pokemon in list" :key="pokemon.data.id" class="item">
         <img :src="pokemon.data.imageUrl" :alt="pokemon.data.name" />
         <p>{{ pokemon.data.name }}</p>
       </div>
@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted, computed} from "vue";
+import {ref, onMounted} from "vue";
 import type {Pokemon} from "../domain/Pokemon/Entity/Pokemon.ts";
 import {useVirtualList} from "@vueuse/core";
 import {getPokemonList} from "../Application/Usecase/GetPokemonList.ts";
