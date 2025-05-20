@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import PokemonListInfiniteScroll from "./components/PokemonListInfiniteScroll.vue";
 import PokemonListVirtualList from "./components/PokemonListVirtualList.vue";
+import PokemonListCombined from "./components/PokemonListCombined.vue";
 </script>
 
 <template>
@@ -14,6 +15,11 @@ import PokemonListVirtualList from "./components/PokemonListVirtualList.vue";
       <p>Virtual List</p>
       <p>表示領域のみ描画</p>
       <PokemonListVirtualList/>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <p>Combined</p>
+      <p>Infinite Scroll & Virtual List</p>
+      <PokemonListCombined/>
     </div>
   </div>
 </template>
